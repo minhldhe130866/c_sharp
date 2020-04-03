@@ -1,0 +1,167 @@
+// connect to db
+  class DAO
+    {
+        public static SqlConnection GetConnection()
+        {
+            //doc thong tin tu file config.
+            string ConnectString = ConfigurationManager.ConnectionStrings["PRN292_20Spr_Trial"].ToString();
+            SqlConnection Connection = new SqlConnection(ConnectString);
+            return Connection;
+        }
+
+        public static DataTable GetDataBySQL(string sql)
+        {
+            SqlCommand Command = new SqlCommand(sql, GetConnection());
+            DataTable dt = new DataTable();
+            Command.Connection.Open();
+
+            SqlDataReader Reader = Command.ExecuteReader();
+
+            dt.Load(Reader);
+            Command.Connection.Close();
+            return dt;
+        }
+
+        public static DataTable GetDataBySQLWithParameters(string sql, params SqlParameter[] parameters)
+        {
+            SqlCommand Command = new SqlCommand(sql, GetConnection());
+            DataTable dt = new DataTable();
+            Command.Parameters.AddRange(parameters);
+            Command.Connection.Open();
+
+            SqlDataReader Reader = Command.ExecuteReader();
+
+            dt.Load(Reader);
+            Command.Connection.Close();
+            return dt;
+        }
+
+        public static int ExecuteSQL(string sql)
+        {
+            SqlCommand Command = new SqlCommand(sql, GetConnection());
+            Command.Connection.Open();
+            int k = Command.ExecuteNonQuery();
+            Command.Connection.Close();
+            return k;
+        }
+
+        public static int ExecuteSQLWithParameters(string sql, params SqlParameter[] parameters)
+        {
+            SqlCommand Command = new SqlCommand(sql, GetConnection());
+            Command.Connection.Open();
+            Command.Parameters.AddRange(parameters);
+            int k = Command.ExecuteNonQuery();
+            Command.Connection.Close();
+            return k;
+        }
+    }
+
+
+
+ <connectionStrings>
+       <add name="PRN292_20Spr_Trial" connectionString="server=MINHMACBOOK;database=PRN292_20Spr_Trial;user=sa; password=123456"/>
+  </connectionStrings>
+
+
+
+
+// format data  
+void FormatDataGridView()
+        {
+         
+            dataGridView1.Columns.Clear();
+            dataGridView1.AutoGenerateColumns = false;
+            DataGridViewCheckBoxColumn checkbox = new DataGridViewCheckBoxColumn();
+            checkbox.Name = "Select";
+            checkbox.HeaderText = "Select";
+            dataGridView1.Columns.Add(checkbox);
+
+            dataGridView1.Columns.Add("member_id", "Member ID");
+            dataGridView1.Columns["member_id"].DataPropertyName = "member_id";
+
+            dataGridView1.Columns.Add("lastname", "Last Name");
+            dataGridView1.Columns["lastname"].DataPropertyName = "lastname";
+
+            dataGridView1.Columns.Add("firstname", "First Name");
+            dataGridView1.Columns["firstname"].DataPropertyName = "firstname";
+
+            dataGridView1.Columns.Add("regionname", "Region Name");
+            dataGridView1.Columns["regionname"].DataPropertyName = "regionname";
+
+
+            DataGridViewButtonColumn edit = new DataGridViewButtonColumn();
+            edit.Name = "Edit";
+            edit.HeaderText = "Edit";
+            edit.Text = "Edit";
+            edit.UseColumnTextForButtonValue = true;
+            dataGridView1.Columns.Add(edit);
+            dataGridView1.DataSource = Q1.App_Code.MemberList.GetAll();
+        }
+
+
+
+
+
+   // yes / no 
+            DialogResult dr = MessageBox.Show($"Delete {selectedMember.Count} member(s)", "Delete", MessageBoxButtons.YesNo,
+               MessageBoxIcon.Information);
+            //
+            if (dr == DialogResult.Yes)
+            {
+
+
+
+
+ private void dataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
+        {
+            //kiem tra co phai bam vao nut edit ko?
+            //chu y cac exception lien quan toi ColumnIndex va RowIndex.
+            if (dataGridView1.Columns[e.ColumnIndex].Name == "editcol")
+            {
+                //MessageBox.Show(dataGridView1.Rows[e.RowIndex].Cells["firstname"].Value.ToString());
+                //MessageBox.Show(((List<Employee>)dataGridView1.DataSource)[e.RowIndex].firstname);
+                frmAdd form1 = new frmAdd(((List<Employee>)dataGridView1.DataSource)[e.RowIndex]);
+                form1.Show();
+            }
+        }s
+
+
+
+// pagination
+ private void PopulatePager(int pageCount, int currentPage)
+        {
+            List<Paging> pages = new List<Paging>();
+            int begin = currentPage - 2;
+            int end = currentPage + 2;
+            if (pageCount > 0)
+            {
+                if (currentPage > 3)
+                {
+                    pages.Add(new Paging("First", 1));
+                }
+                if (begin <= 1)
+                {
+                    begin = 1;
+                }
+                if (end > pageCount)
+                {
+                    end = pageCount;
+                }
+                for (int i = begin; i < currentPage; i++)
+                {
+                    pages.Add(new Paging(i.ToString(), i));
+                }
+                pages.Add(new Paging("<span class=\"active\">" + currentPage + "</span>", currentPage));
+                for (int i = currentPage + 1; i <= end; i++)
+                {
+                    pages.Add(new Paging(i.ToString(), i));
+                }
+
+                if (end <= pageCount - 1)
+                {
+                    pages.Add(new Paging("Last", pageCount));
+                }
+            }
+
+            rptPager.DataSource = pages;
+            rptPager.DataBind();
